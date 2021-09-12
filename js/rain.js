@@ -3,7 +3,7 @@ var canvas = document.getElementById("canvas"),
     i,
     j,
     k,
-    colorArray = ["#f52222", "#ff9300", "#ceff00"],
+    colorArray = ["#4d60ea", "#e38686", "#5daf9f", "#b9c940", "#dd5252", "#59d38c", "#cf42d4"],
     mouse = {
         x: undefined,
         y: undefined
@@ -29,23 +29,22 @@ function resize() {
 window.onresize = function () {
     resize();
 };
-
 /* end resize */
 
 /* classes */
 
 /* particle */
 
-var friction = 0.4;
+var friction = 0.7;
 
 class Particle {
     constructor(x, y, r, v) {
         this.x = x;
         this.y = y;
         this.r = r;
-        this.color = generateRandomColor();
+        this.color = "white";
         this.v = v;
-        this.alpha = 1
+        this.alpha = 0.02
     }
     draw() {
         c.save();
@@ -59,53 +58,53 @@ class Particle {
         c.restore();
     }
     update() {
-    if (this.x + this.r > canvas.width || this.x - this.r < 0) {
-            this.v.x = -this.v.x;
-        }
-        if (this.y + this.r > canvas.height || this.y - this.r < 0) {
-            this.v.y = -this.v.y;
-        }
         this.x = this.x + (this.v.x) * friction;
         this.y = this.y + (this.v.y) * friction;
-        this.alpha -= 0.02;
+        if (this.alpha >= 1){
+            gsap.to(this, {
+                alpha : this.alpha - .5
+            })
+        } else {
+            this.alpha += 0.01;
+        }
+        if (
+            Math.abs(this.x - mouse.x) < 50 &&
+            Math.abs(this.y - mouse.y) < 50 &&
+            this.r < 30
+        ) {
+            this.r += 5;
+        }
         this.draw();
     }
 }
 
+setInterval(function(){
+     var x = generateRandomRange(canvas.width,0),
+        y = generateRandomRange(canvas.height,0),
+        r = generateRandomRange(3,1),
+    v = {
+        x : -1,
+        y : 1
+    };
+    particlesArray.push(new Particle(x,y,r,v))
+},100)
 /* end particle */
 
 /*  end classes */
 
-window.addEventListener("mousemove",function (e) {
-    for (i = 0; i < 2; i++) {
-    var r = generateRandomRange(3,3),
-    v = {
-        x : generateRandomRange(10,-5) * 2,
-        y : generateRandomRange(10,-5) * 2
-    };
-    particlesArray.push(new Particle(e.x,e.y,r,v))
-    }
-				console.log(particlesArray);
-});
+var animationId;
 
-function animate() {
+function animate1() {
     // animation loop
     
-   	requestAnimationFrame(animate);
-    
-    // clearing canvas
-    
-    c.fillStyle = "rgba(34, 34, 34, 0.46)";
+    animationId  = requestAnimationFrame(animate1);
+    // clearing canvas 
+    c.fillStyle = "rgba(0, 2, 29, 0.2)";
     c.fillRect(0, 0, canvas.width, canvas.height);
-    
     for (k = 0; k < particlesArray.length; k++) {
-        if (particlesArray[k].alpha <= 0.3) {
-					   gsap.to(particlesArray[k], {
-							r : 0
-						})
-					 }
-        if (particlesArray[k].alpha <= 0.03) {
-
+        
+        if (particlesArray[k].alpha <= 0.01) {
+            
             var l = k;
             
             setTimeout(function(){
@@ -121,4 +120,4 @@ function animate() {
         }
     }
 }
-animate();
+animate1();
